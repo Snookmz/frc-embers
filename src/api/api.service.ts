@@ -48,6 +48,7 @@ export class ApiService {
       const combined$ = combineLatest(requests$);
       combined$.subscribe(res => {
         console.log('---------- combined result res: ', res);
+        debugger;
       }, err => {
         console.error('--------- error from combinedLatest request: ', err);
       })
@@ -56,9 +57,6 @@ export class ApiService {
   }
 
   public getNumberOfPagesForTeams(): Observable<number> {
-
-    console.log('----------- authorizationCode: ', this.authorizationCode);
-
     return this.httpService.get(this.baseUrl + this.teamListingsUrl, {headers: {Authorization: this.authorizationCode}}).pipe(map(res => {
       // console.log('----------- res: ', res.data);
       const teamResponse: TeamResponse = res.data;
@@ -83,7 +81,7 @@ export class ApiService {
    */
 
   private getTeamsForPageFromApi(page: number): Observable<Team[]> {
-    return this.httpService.get(this.teamListingsUrl + '?page='+page).pipe(map(res => {
+    return this.httpService.get(this.baseUrl + this.teamListingsUrl + '?page='+page, {headers: {Authorization: this.authorizationCode}}).pipe(map(res => {
       const teamResponse: TeamResponse = res.data;
       return teamResponse.teams;
     }))

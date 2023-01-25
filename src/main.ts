@@ -18,11 +18,11 @@ async function bootstrap() {
 
   // apiService.getTeams();
 
-  apiService.getNumberOfPagesForTeams().subscribe(res => {
-    console.log('------- result: ', res);
-  }, err => {
-    console.error('---------- error: ', err);
-  })
+  // apiService.getNumberOfPagesForTeams().subscribe(res => {
+  //   console.log('------- result: ', res);
+  // }, err => {
+  //   console.error('---------- error: ', err);
+  // })
 
   await app.close();
 
