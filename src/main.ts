@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ApiService } from "./api/api.service";
 import { HttpService } from "@nestjs/axios";
 import * as fs from "fs";
+import { FileService } from "./file/file.service";
 
 async function bootstrap() {
   // const app = await NestFactory.create(AppModule);
@@ -13,10 +14,14 @@ async function bootstrap() {
 
   const authCode = readAuthCode();
   const httpService: HttpService = new HttpService()
-  const apiService: ApiService = new ApiService(httpService)
+  const apiService: ApiService = new ApiService(httpService);
+  const fileService: FileService = new FileService();
   apiService.authCode = 'Basic ' + authCode;
 
-  apiService.getTeams();
+  apiService.getTeams(5).subscribe(teams => {
+    console.log('teams.length: ', teams.length);
+    fileService.saveTeamsToFile('', 'teams.json', teams);
+  });
 
   // apiService.getNumberOfPagesForTeams().subscribe(res => {
   //   console.log('------- result: ', res);
