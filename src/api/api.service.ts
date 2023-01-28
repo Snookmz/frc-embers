@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BehaviorSubject, combineLatest, defer, map, Observable } from "rxjs";
+import { BehaviorSubject, combineLatest, defer, map, mergeMap, Observable } from "rxjs";
 import { Team, TeamResponse } from "../objects/Team";
 import { HttpService } from "@nestjs/axios";
 
@@ -34,15 +34,51 @@ export class ApiService {
   set authCode(authorizationCode: string) {
     this.authorizationCode = authorizationCode;
   }
-
-  public getTeams(): void {
+  
+  /**
+   *
+   * @param limitCalls
+   *
+   * limitCalls limits the number of team pages we get. Useful for testing
+   */
+  public getTeams(limitCalls?: number ): Observable<Team[]> {
+    console.log('ApiService, getTeams');
+    return this.getNumberOfPagesForTeams().pipe(mergeMap(totalPages => {
+      // console.log('---------- getNumberOfPagesForTeams: ', totalPages);
+      limitCalls = limitCalls ? limitCalls : totalPages;
+      const requests$: Observable<Team[]>[] = []
+      for (let i = 1; i <= limitCalls; i++) {
+        requests$.push(this.getTeamsForPageFromApi(i))
+      }
+      return combineLatest(requests$).pipe(map(arrayOfArrayOfTeams => {
+        // console.log('arrayOfArrayOfTeams: ', arrayOfArrayOfTeams);
+        // console.log('----------- arrayOfArrayOfTeams.length: ', arrayOfArrayOfTeams.length);
+        const teams: Team[] = [];
+        if (arrayOfArrayOfTeams && arrayOfArrayOfTeams.length > 0) {
+          arrayOfArrayOfTeams.forEach(tms => {
+            // console.log('--------------- tms:', tms);
+            teams.push(...tms);
+          })
+        }
+        return teams;
+      }));
+    }))
+  }
+ 
+  /*
+  
+  ORIGINAL before turned into Observable
+  
+  public getTeams(limitCalls?: number ): void {
     console.log('ApiService, getTeams');
     this.getNumberOfPagesForTeams().subscribe(totalPages => {
-      console.log('--------- total pages: ', totalPages);
+      // console.log('--------- total pages: ', totalPages);
 
+      // if we have limitCalls then use that value, otherwise we'll get all the pages (totalPages)
+      limitCalls = limitCalls ? limitCalls : totalPages;
+      
       const requests$: Observable<Team[]>[] = []
-      // for (let i = 1; i <= totalPages; i++) {
-      for (let i = 1; i <= 10; i++) {
+      for (let i = 1; i <= limitCalls; i++) {
         requests$.push(this.getTeamsForPageFromApi(i))
       }
       const combined$ = combineLatest(requests$);
@@ -53,14 +89,15 @@ export class ApiService {
         console.error('--------- error from combinedLatest request: ', err);
       })
     })
-
   }
-
+ 
+   */
+ 
   public getNumberOfPagesForTeams(): Observable<number> {
     return this.httpService.get(this.baseUrl + this.teamListingsUrl, {headers: {Authorization: this.authorizationCode}}).pipe(map(res => {
-      // console.log('----------- res: ', res.data);
+      // console.log('----------- getNumberOfPagesForTeams res: ', res);
       const teamResponse: TeamResponse = res.data;
-      // console.log('teamCountTotal: ', teamResponse.teamCountTotal);
+      // console.log('---- teamResponse: ', teamResponse);
       console.log('getNumberOfPagesForTeams, pages: ', teamResponse.pageTotal);
       return teamResponse.pageTotal;
     }))
@@ -79,23 +116,20 @@ export class ApiService {
     }))
   }
    */
-
-  private getTeamsForPageFromApi(page: number): Observable<Team[]> {
-    return this.httpService.get(this.baseUrl + this.teamListingsUrl + '?page='+page, {headers: {Authorization: this.authorizationCode}}).pipe(map(res => {
-      const teamResponse: TeamResponse = res.data;
-      return teamResponse.teams;
-    }))
-  }
-  /*
-  OLD
-    private getTeamsForPageFromApi(page: number): Observable<Team[]> {
-    const getTeams$ = defer(() => axios.get(this.teamListingsUrl + '?page='+page));
-    return getTeams$.pipe(map(res => {
-      const teamResponse: TeamResponse = res.data;
-      return teamResponse.teams;
-    }))
-  }
+  
+  /**
+   *
+   * @param page
+   *
+   * Gets the teams (Team[]) for the page supplied.
    */
+  public getTeamsForPageFromApi(page: number): Observable<Team[]> {
+    return this.httpService.get(this.baseUrl + this.teamListingsUrl + '?page='+page, {headers: {Authorization: this.authorizationCode}}).pipe(map(res => {
+      // console.log('getTeamsForPageFromApi result: ', res);
+      const teamResponse: TeamResponse = res.data;
+      return teamResponse.teams;
+    }))
+  }
 
 
   private printTeams(teams: Team[]): void {

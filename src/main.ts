@@ -16,7 +16,7 @@ async function bootstrap() {
   const apiService: ApiService = new ApiService(httpService)
   apiService.authCode = 'Basic ' + authCode;
 
-  // apiService.getTeams();
+  apiService.getTeams();
 
   // apiService.getNumberOfPagesForTeams().subscribe(res => {
   //   console.log('------- result: ', res);

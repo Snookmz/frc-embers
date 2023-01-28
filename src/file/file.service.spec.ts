@@ -3,7 +3,7 @@ import { FileService } from './file.service';
 import { Team } from "../objects/Team";
 import { unlinkSync } from "fs";
 
-fdescribe('FileService', () => {
+describe('FileService', () => {
   let service: FileService;
 
   beforeEach(async () => {
@@ -19,7 +19,7 @@ fdescribe('FileService', () => {
   });
 
 
-  fit('should save Team[] to file', () => {
+  it('should save Team[] to file', () => {
     const dir = 'output/';
     const file = 'deleteme.json';
     const teams = generateTeamsObject();
