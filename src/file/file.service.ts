@@ -4,7 +4,16 @@ import * as fs from "fs";
 
 @Injectable()
 export class FileService {
-
+  
+  public saveJSONToFile(path: string, fileName: string, json: any, addTimestampToFilename?: boolean): void {
+    console.log('FileService, saveJSONToFile, %s%s', path, fileName);
+    try {
+      fs.writeFileSync(`${path}${fileName}`, JSON.stringify(json, null, 2));
+    } catch (err) {
+      console.error(err);
+    }
+  }
+  
   public saveTeamsToFile(path: string, fileName: string, teams: Team[], addTimestampToFilename?: boolean): void {
     console.log('FileService, saveTeamsToFile, %s%s', path, fileName);
     try {

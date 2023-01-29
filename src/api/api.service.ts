@@ -131,6 +131,7 @@ export class ApiService {
     }))
   }
 
+  
 
   private printTeams(teams: Team[]): void {
     teams.forEach(team => {

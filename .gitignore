@@ -2,3 +2,4 @@ node_modules/
 dist/
 authCode.txt
 teams.json
+output/
