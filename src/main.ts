@@ -7,6 +7,7 @@ import { FileService } from "./file/file.service";
 import { EventListingsService } from "./api/event-listings/event-listings.service";
 import { DistrictListingsService } from "./api/district-listings/district-listings.service";
 import { ScheduleService } from "./api/schedule/schedule.service";
+import { MatchesService } from "./api/matches/matches.service";
 
 async function bootstrap() {
   // const app = await NestFactory.create(AppModule);
@@ -39,7 +40,33 @@ async function bootstrap() {
   //   const fileName = `schedule-${code}-${tournamentLevel}.json`
   //   fileService.saveJSONToFile('output/', fileName, schedules);
   // })
-
+  
+  /**
+   * Get the score for season/event/tournamentLevel
+   */
+  // const code = 'ARFA';
+  // const tournamentLevel = 'Playoff';
+  // const season = '2015';
+  // const matchesService: MatchesService = new MatchesService('Basic ' + authCode, baseUrl, httpService);
+  // matchesService.getScoreForEvent(season, code, tournamentLevel).subscribe(scores => {
+  //   console.log('----------- getScheduleForEvent result: ', scores);
+  //   const fileName = `score-${code}-${tournamentLevel}.json`
+  //   fileService.saveJSONToFile('output/', fileName, scores);
+  // })
+  
+  /**
+   * Get the match result
+   */
+  const code = 'ARFA';
+  const tournamentLevel = 'Playoff';
+  const season = '2015';
+  const matchesService: MatchesService = new MatchesService('Basic ' + authCode, baseUrl, httpService);
+  matchesService.getMatchResults(season, code, tournamentLevel).subscribe(scores => {
+    console.log('----------- getScheduleForEvent result: ', scores);
+    const fileName = `match-results-${season}-${code}-${tournamentLevel}.json`
+    fileService.saveJSONToFile('output/', fileName, scores);
+  })
+  
   // Get Districts and save to output/districts.json
   // const districtListing: DistrictListingsService = new DistrictListingsService('Basic ' + authCode, baseUrl, httpService);
   // districtListing.getDistricts().subscribe(districts => {
